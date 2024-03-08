@@ -2,21 +2,14 @@ pipeline {
   agent any
 
   environment {
-      REGISTRY_CREDENTIALS = "registry_credentials"
-      GIT_CREDENTIALS = "git_credentials"
-      REGISTRY = "tuantoquq"
-      DOCKER_IMAGE = ""
-      GITHUB_URL = "https://github.com/tuantoquq/jenkins-started"
-      GIT_BRANCH = "main"
+    REGISTRY_CREDENTIALS = "registry_credentials"
+    GIT_CREDENTIALS = "git_credentials"
+    REGISTRY = "tuantoquq"
+    DOCKER_IMAGE = ""
+    BACKEND_HOST = "18.142.121.226"
   }
 
   stages {
-    stage ("Checkout") {
-      steps {
-        sh "echo 'Checking out the code'"
-        git branch:"$GIT_BRANCH", credentialsId: "$GIT_CREDENTIALS", url: "$GITHUB_URL"
-      }
-    }
     stage ("Building") {
       steps {
         sh "echo 'Building the app'"
@@ -45,12 +38,16 @@ pipeline {
     stage ("Deploying") {
       steps {
         sh "echo 'Deploying the app'"
-        sshagent (credentials: ['ssh-credentials']) {
-          sh "ssh -o StrictHostKeyChecking=no -l root" + " " + "docker login -u $DOCKERHUB_CREDENTIALS --password-stdin"
-          sh "ssh -o StrictHostKeyChecking=no -l root" + " " + "docker pull sample-next-app:latest"
-          sh "ssh -o StrictHostKeyChecking=no -l root" + " " + "docker stop sample-next-app"
-          sh "ssh -o StrictHostKeyChecking=no -l root" + " " + "docker rm sample-next-app"
-          sh "ssh -o StrictHostKeyChecking=no -l root" + " " + "docker run -d -p 3000:3000 --name sample-next-app sample-next-app:latest"
+        sshagent (credentials: ['backend-ssh-server'], usernameVariable: 'SSH_USERNAME') {
+          withCredentials([usernamePassword(credentialsId: "$REGISTRY_CREDENTIALS", usernameVariable: 'DOCKERHUB_CREDENTIALS', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
+            sh '''
+              ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$BACKEND_HOST << EOF
+                echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_CREDENTIALS --password-stdin
+                docker pull $REGISTRY/sample-next-app:latest
+                docker run -d -p 3000:3000 --name sample-next-app $REGISTRY/sample-next-app:latest
+              EOF
+            '''
+          }
         }
       }
     }
