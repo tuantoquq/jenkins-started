@@ -1,14 +1,14 @@
 pipeline {
-    agent any
+  agent any
 
-    environment {
-        REGISTRY_CREDENTIALS = "registry_credentials"
-        GIT_CREDENTIALS = "git_credentials"
-        REGISTRY = "tuantoquq"
-        DOCKER_IMAGE = ""
-    }
+  environment {
+      REGISTRY_CREDENTIALS = "registry_credentials"
+      GIT_CREDENTIALS = "git_credentials"
+      REGISTRY = "tuantoquq"
+      DOCKER_IMAGE = ""
+  }
 
-    stages {
+  stages {
       stage ("Checkout") {
         steps {
           sh "echo 'Checking out the code'"
@@ -61,4 +61,5 @@ pipeline {
             sh "docker logout"
         }
     }
+  }
 }
