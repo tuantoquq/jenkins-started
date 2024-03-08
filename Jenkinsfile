@@ -41,15 +41,16 @@ pipeline {
         sh "echo 'Deploying the app'"
         sshagent (credentials: ['backend-ssh-server']) {
           withCredentials([usernamePassword(credentialsId: "$REGISTRY_CREDENTIALS", usernameVariable: 'DOCKERHUB_CREDENTIALS', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
-            sh '''
+            sh '''#!/bin/bash
               ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$BACKEND_HOST << EOF
                 echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_CREDENTIALS --password-stdin
                 docker pull $REGISTRY/sample-next-app:latest
-                if [ "$(docker ps -q -f name=sample-next-app)" ]; then
-                  docker stop sample-next-app
-                  docker rm sample-next-app
+                if [ "$(docker ps -q -f name=sample-next-app)" ]; then 
+                  docker stop sample-next-app 
+                  docker rm sample-next-app 
                 fi
                 docker run -d -p 3000:3000 --name sample-next-app $REGISTRY/sample-next-app:latest
+              << EOF
             '''
           }
         }
