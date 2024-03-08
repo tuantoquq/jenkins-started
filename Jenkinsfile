@@ -26,7 +26,7 @@ pipeline {
         steps {
           sh "echo 'Pushing the image to Docker Hub'"
           sh "docker tag sample-next-app:latest ${DOCKERHUB_REPO_PREFIX}/sample-next-app:latest"
-          sh "docker push sample-next-app:latest"
+          sh "docker push ${DOCKERHUB_REPO_PREFIX}/sample-next-app:latest"
         }
       }
 
