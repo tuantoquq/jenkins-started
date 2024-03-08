@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         DOCKERHUB_CREDENTIALS = credentials('Jenkins-Docker-Hub')
+        DOCKERHUB_REPO = "tuantoquq/"
     }
 
     stages {
@@ -23,6 +24,7 @@ pipeline {
       stage ("Push" ){
           steps {
               sh "echo 'Pushing the image to Docker Hub'"
+              sh "docker tag sample-next-app:latest $DOCKERHUB_REPO/sample-next-app:latest"
               sh "docker push sample-next-app:latest"
           }
       }
@@ -37,6 +39,15 @@ pipeline {
                   sh "ssh -o StrictHostKeyChecking=no -l root" + " " + "docker rm sample-next-app"
                   sh "ssh -o StrictHostKeyChecking=no -l root" + " " + "docker run -d -p 3000:3000 --name sample-next-app sample-next-app:latest"
               }
+          }
+      }
+
+      post {
+          always {
+              sh "echo 'Cleaning up the environment'"
+              sh "docker images"
+              sh "docker image rm sample-next-app:latest"
+              sh "docker logout"
           }
       }
     }
