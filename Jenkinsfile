@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('Jenkins-Docker-Hub')
+    }
+
     stages {
       stage ("Build") {
         steps {
@@ -12,7 +16,7 @@ pipeline {
       stage ("Push" ){
           steps {
               sh "echo 'Pushing the app'"
-              sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
+              sh "docker login -u $DOCKERHUB_CREDENTIALS --password-stdin"
               sh "docker push sample-next-app:latest"
           }
       }
@@ -21,7 +25,7 @@ pipeline {
           steps {
               sh "echo 'Deploying the app'"
               sshagent (credentials: ['ssh-credentials']) {
-                  sh "ssh -o StrictHostKeyChecking=no -l root" + " " + "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
+                  sh "ssh -o StrictHostKeyChecking=no -l root" + " " + "docker login -u $DOCKERHUB_CREDENTIALS --password-stdin"
                   sh "ssh -o StrictHostKeyChecking=no -l root" + " " + "docker pull sample-next-app:latest"
                   sh "ssh -o StrictHostKeyChecking=no -l root" + " " + "docker stop sample-next-app"
                   sh "ssh -o StrictHostKeyChecking=no -l root" + " " + "docker rm sample-next-app"
