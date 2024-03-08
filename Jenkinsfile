@@ -2,14 +2,14 @@ pipeline {
     agent any
 
     stages {
-      stage "Build" {
+      stage ("Build") {
         steps {
             sh "echo 'Building the app'"
             sh "docker build -t sample-next-app:latest ./sample-app"
         }
       }
 
-      stage "Push" {
+      stage ("Push" ){
           steps {
               sh "echo 'Pushing the app'"
               sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
@@ -17,7 +17,7 @@ pipeline {
           }
       }
 
-      stage "Deploy" {
+      stage ("Deploy") {
           steps {
               sh "echo 'Deploying the app'"
               sshagent (credentials: ['ssh-credentials']) {
