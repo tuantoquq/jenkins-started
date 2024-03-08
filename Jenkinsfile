@@ -45,7 +45,6 @@ pipeline {
               ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$BACKEND_HOST << EOF
                 echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_CREDENTIALS --password-stdin
                 docker pull $REGISTRY/sample-next-app:latest
-                docker image prune -f
                 if [ "$(docker ps -q -f name=sample-next-app)" ]; then
                   docker stop sample-next-app
                   docker rm sample-next-app
