@@ -39,7 +39,7 @@ pipeline {
     stage ("Deploying") {
       steps {
         sh "echo 'Deploying the app'"
-        sshagent (credentials: ['ssh_credentials']) {
+        sshagent (credentials: ['backend-ssh-server']) {
           withCredentials([usernamePassword(credentialsId: "$REGISTRY_CREDENTIALS", usernameVariable: 'DOCKERHUB_CREDENTIALS', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
             sh '''
               ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$BACKEND_HOST << EOF
