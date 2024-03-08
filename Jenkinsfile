@@ -7,6 +7,7 @@ pipeline {
     REGISTRY = "tuantoquq"
     DOCKER_IMAGE = ""
     BACKEND_HOST = "18.142.121.226"
+    SSH_USERNAME = "ubuntu"
   }
 
   stages {
@@ -38,7 +39,7 @@ pipeline {
     stage ("Deploying") {
       steps {
         sh "echo 'Deploying the app'"
-        sshagent (credentials: ['backend-ssh-server'], usernameVariable: 'SSH_USERNAME') {
+        sshagent (credentials: ['ssh_credentials']) {
           withCredentials([usernamePassword(credentialsId: "$REGISTRY_CREDENTIALS", usernameVariable: 'DOCKERHUB_CREDENTIALS', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
             sh '''
               ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$BACKEND_HOST << EOF
