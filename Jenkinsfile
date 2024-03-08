@@ -13,10 +13,16 @@ pipeline {
         }
       }
 
+      stage ("Login Docker Hub") {
+          steps {
+              sh "echo 'Logging into Docker Hub'"
+              sh "echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin"
+          }
+      }
+
       stage ("Push" ){
           steps {
-              sh "echo 'Pushing the app'"
-              sh "docker login -u $DOCKERHUB_CREDENTIALS --password-stdin"
+              sh "echo 'Pushing the image to Docker Hub'"
               sh "docker push sample-next-app:latest"
           }
       }
