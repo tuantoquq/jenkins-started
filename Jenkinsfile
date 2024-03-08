@@ -3,7 +3,10 @@ pipeline {
 
     environment {
         DOCKERHUB_CREDENTIALS = credentials('Jenkins-Docker-Hub')
-        DOCKERHUB_REPO = "tuantoquq/"
+    }
+
+    parameters {
+        string(name: 'DOCKERHUB_REPO', defaultValue: 'tuantoquq', description: 'Docker Hub Repository')
     }
 
     stages {
@@ -24,7 +27,7 @@ pipeline {
       stage ("Push" ){
           steps {
               sh "echo 'Pushing the image to Docker Hub'"
-              sh "docker tag sample-next-app:latest $DOCKERHUB_REPO/sample-next-app:latest"
+              sh "docker tag sample-next-app:latest ${DOCKERHUB_REPO}/sample-next-app:latest"
               sh "docker push sample-next-app:latest"
           }
       }
