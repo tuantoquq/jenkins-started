@@ -1,36 +1,45 @@
-def DOCKERHUB_REPO_PREFIX = "tuantoquq"
-
 pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('Jenkins-Docker-Hub')
+        REGISTRY_CREDENTIALS = "registry_credentials"
+        GIT_CREDENTIALS = "git_credentials"
+        REGISTRY = "tuantoquq"
+        DOCKER_IMAGE = ""
     }
 
     stages {
-      stage ("Build") {
+      stage ("Checkout") {
+        steps {
+          sh "echo 'Checking out the code'"
+          git credentialsId: 'git-credentials', url: 'https://github.com/tuantoquq/jenkins-started'
+        }
+      stage ("Building") {
         steps {
           sh "echo 'Building the app'"
           sh "docker build -t sample-next-app:latest ./sample-app"
         }
       }
 
-      stage ("Login Docker Hub") {
+      stage ("Login to Docker Hub") {
         steps {
-          sh "echo 'Logging into Docker Hub'"
-          sh("echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin")
+          script {
+            withCredentials([usernamePassword(credentialsId: $REGISTRY_CREDENTIALS, usernameVariable: 'DOCKERHUB_CREDENTIALS', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
+              sh "echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_CREDENTIALS --password-stdin"
+            }
+          }
         }
       }
 
-      stage ("Push" ){
+      stage ("Pushing" ){
         steps {
           sh "echo 'Pushing the image to Docker Hub'"
-          sh "docker tag sample-next-app:latest ${DOCKERHUB_REPO_PREFIX}/sample-next-app:latest"
-          sh "docker push ${DOCKERHUB_REPO_PREFIX}/sample-next-app:latest"
+          sh "docker tag sample-next-app:latest $DOCKERHUB_REPO_PREFIX/sample-next-app:latest"
+          sh "docker push $DOCKERHUB_REPO_PREFIX/sample-next-app:latest"
         }
       }
 
-      stage ("Deploy") {
+      stage ("Deploying") {
         steps {
           sh "echo 'Deploying the app'"
           sshagent (credentials: ['ssh-credentials']) {
