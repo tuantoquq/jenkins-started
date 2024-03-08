@@ -41,14 +41,14 @@ pipeline {
               }
           }
       }
+    }
 
-      post {
-          always {
-              sh "echo 'Cleaning up the environment'"
-              sh "docker images"
-              sh "docker image rm sample-next-app:latest"
-              sh "docker logout"
-          }
-      }
+    post {
+        always {
+            sh "echo 'Cleaning up the environment'"
+            sh "docker images"
+            sh "docker image rm sample-next-app:latest"
+            sh "docker logout"
+        }
     }
 }
