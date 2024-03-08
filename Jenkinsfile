@@ -53,11 +53,11 @@ pipeline {
             
             echo "Removing the container if exists"
             script {
-              def containerExist = sh(script: "ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$BACKEND_HOST docker ps -q -f name=$CONTAINER_NAME", returnStdout: true) == 0
+              def containerExist = sh(script: "ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$BACKEND_HOST docker ps -q -f name=$CONTAINER_NAME", returnStdout: true).trim()
               if (containerExist) {
-                sh "ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$BACKEND_HOST docker stop $CONTAINER_NAME"
-                sh "ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$BACKEND_HOST docker rm $CONTAINER_NAME"
+                sh "ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$BACKEND_HOST docker rm -f $CONTAINER_NAME"
               }
+              echo "Removed the container because it already exists"
             }
 
             echo "Deploying the app"
