@@ -8,6 +8,9 @@ pipeline {
     DOCKER_IMAGE = ""
     BACKEND_HOST = "18.142.121.226"
     SSH_USERNAME = "ubuntu"
+    IMAGE_NAME = "sample-next-app"
+    IMAGE_TAG = "latest"
+    CONTAINER_NAME = "sample-next-app"
   }
 
   stages {
@@ -31,8 +34,8 @@ pipeline {
     stage ("Pushing" ){
       steps {
         sh "echo 'Pushing the image to Docker Hub'"
-        sh "docker tag sample-next-app:latest $REGISTRY/sample-next-app:latest"
-        sh "docker push $REGISTRY/sample-next-app:latest"
+        sh "docker tag $IMAGE_NAME:$IMAGE_TAG $REGISTRY/$IMAGE_NAME:$IMAGE_TAG"
+        sh "docker push $REGISTRY/$IMAGE_NAME:$IMAGE_TAG"
       }
     }
 
@@ -44,12 +47,13 @@ pipeline {
             sh '''#!/bin/bash
               ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$BACKEND_HOST << EOF
                 echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_CREDENTIALS --password-stdin
-                docker pull $REGISTRY/sample-next-app:latest
-                if [ "$(docker ps -q -f name=sample-next-app)" ]; then 
-                  docker stop sample-next-app 
-                  docker rm sample-next-app 
+                docker pull $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+                if [ "$(docker ps -q -f name=$CONTAINER_NAME)" ]; then 
+                  echo "Container $CONTAINER_NAME is running. Stopping and removing it"
+                  docker stop $CONTAINER_NAME 
+                  docker rm $CONTAINER_NAME 
                 fi
-                docker run -d -p 3000:3000 --name sample-next-app $REGISTRY/sample-next-app:latest
+                docker run -d -p 3000:3000 --name $CONTAINER_NAME $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
               << EOF
             '''
           }
