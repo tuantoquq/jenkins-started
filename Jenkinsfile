@@ -56,6 +56,18 @@ pipeline {
                 docker run -d -p 3000:3000 --name $CONTAINER_NAME $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
               << EOF
             '''
+            
+            echo "Removing the container if exists"
+            script {
+              def containerExist = sh(script: "ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$BACKEND_HOST docker ps -q -f name=$CONTAINER_NAME", returnStdout: true) == 0
+              if (containerExist) {
+                sh "ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$BACKEND_HOST docker stop $CONTAINER_NAME"
+                sh "ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$BACKEND_HOST docker rm $CONTAINER_NAME"
+              }
+            }
+
+            echo "Deploying the app"
+            sh "ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$BACKEND_HOST docker run -d -p 3000:3000 --name $CONTAINER_NAME $REGISTRY/$IMAGE_NAME:$IMAGE_TAG"
           }
         }
       }
