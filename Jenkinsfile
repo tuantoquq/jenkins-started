@@ -47,7 +47,7 @@ pipeline {
             sh '''#!/bin/bash
               ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$BACKEND_HOST << EOF
                 echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_CREDENTIALS --password-stdin
-                docker pull $REGISTRY/$IMAGE_NAME:$IMAGE_TAGWWWWW
+                docker pull $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
               << EOF
             '''
             
@@ -60,7 +60,7 @@ pipeline {
               echo "Removed the container because it already exists"
             }
 
-            echo "Deploying the app"
+            echo "Create container"
             sh "ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$BACKEND_HOST docker run -d -p 3000:3000 --name $CONTAINER_NAME $REGISTRY/$IMAGE_NAME:$IMAGE_TAG"
           }
         }
